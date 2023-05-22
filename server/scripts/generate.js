@@ -1,6 +1,6 @@
-import { secp256k1 } from "ethereum-cryptography/secp256k1.js";
-import { toHex } from "ethereum-cryptography/utils.js";
+const {secp256k1} = require('ethereum-cryptography/secp256k1')
+const {toHex} = require('ethereum-cryptography/utils')
 
-const privateKey = secp256k1.randomPrivateKey();
+const privateKey = secp256k1.utils.randomPrivateKey()
 
-console.log('private key', toHex(privateKey));
+console.log("private key: ", toHex(privateKey))
