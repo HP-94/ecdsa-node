@@ -2,14 +2,37 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const port = 3042;
+const { ethers } = require("ethers");
 
 app.use(cors());
 app.use(express.json());
 
+const { secp256k1 } = require('ethereum-cryptography/secp256k1');
+const { toHex } = require('ethereum-cryptography/utils');
+
+const alicePrivateKey = secp256k1.utils.randomPrivateKey();
+const benPrivateKey = secp256k1.utils.randomPrivateKey();
+const bobPrivateKey = secp256k1.utils.randomPrivateKey();
+
+const alicePublicKey = secp256k1.getPublicKey(alicePrivateKey);
+const benPublicKey = secp256k1.getPublicKey(benPrivateKey);
+const bobPublicKey = secp256k1.getPublicKey(bobPrivateKey);
+
+const aliceAddress = getAddressFromPublicKey(alicePublicKey);
+const benAddress = getAddressFromPublicKey(benPublicKey);
+const bobAddress = getAddressFromPublicKey(bobPublicKey);
+
+console.log('Alice public key:', alicePublicKeyHex);
+console.log('Alice private key:', alicePrivateKeyHex);
+console.log('Ben public key:', benPublicKeyHex);
+console.log('Ben private key:', benPrivateKeyHex);
+console.log('Bob public key:', bobPublicKeyHex);
+console.log('Bob private key:', bobPrivateKeyHex);
+
 const balances = {
-  "02a145f350a11804e37ee272b9428dfdd7633176fabb2b10b354bc88ff5e824fdf": 100, // Alice
-  "0325057d2d52a27466f6a5a0c374c279abead351e90ff13aad68ffc3a372e42815": 50, // Ben
-  "03d07bb3808b94f24a38803cab7d04477c22acbf9ba0017c046b59e4b5b1f412c9": 75, // Bob
+  [aliceAddress]: 100, // Alice
+  [benAddress]: 50, // Ben
+  [bobAddress]: 75, // Bob
 };
 
 app.get("/balance/:address", (req, res) => {
@@ -41,4 +64,11 @@ function setInitialBalance(address) {
   if (!balances[address]) {
     balances[address] = 0;
   }
+}
+
+function getAddressFromPublicKey(publicKey) {
+  const publicKeyBytes = Buffer.from(publicKey.slice(2), "hex");
+  const hash = ethers.utils.keccak256(publicKeyBytes);
+  const address = hash.slice(-20).toString("hex");
+  return address;
 }
